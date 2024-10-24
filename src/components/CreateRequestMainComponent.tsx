@@ -8,8 +8,9 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
+
 interface FormData {
-  urls: string[];
+  urls?: string[] | undefined;
 }
 
 const schema = yup.object().shape({
@@ -25,8 +26,9 @@ const schema = yup.object().shape({
 });
 
 
+
 export function CreateRequestMainComponent() {
-  const initialUrls = ["http://drive.google.com/some-link"];
+  const initialUrls: string[] = ["http://drive.google.com/some-link"];
 
   const {
     register,
@@ -34,7 +36,7 @@ export function CreateRequestMainComponent() {
     control,
     trigger,
     formState: { errors },
-  } = useForm({
+  } = useForm<FormData>({
     resolver: yupResolver(schema),
     defaultValues: {
       urls: initialUrls,
@@ -43,8 +45,8 @@ export function CreateRequestMainComponent() {
 
   const { fields, append, remove } = useFieldArray({
     control,
-    // @ts-nocheck
-    name: "urls",
+    // @ts-expect-error: TypeScript is unable to infer the type of "urls" correctly in this context.
+    name: "urls" as string,
   });
 
   const [hideAddUrlBtn, setHideAddUrlBtn] = useState(false);
@@ -55,7 +57,7 @@ export function CreateRequestMainComponent() {
 
 
   const onSubmit = (data: FormData) => {
-    const result = data.urls.map((url: string) => {
+    const result = data.urls?.map((url: string) => {
 
       const value = url.substring(url.lastIndexOf('/') + 1);
       return {
