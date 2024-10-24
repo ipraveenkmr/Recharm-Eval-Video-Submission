@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+'use client'
+import React, { useEffect, useState } from "react";
 import { Button, TextInput, Label } from "flowbite-react";
 import { HiPlus, HiX } from "react-icons/hi";
 import { IoAdd } from "react-icons/io5";
@@ -8,24 +9,36 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
+interface FormData {
+  urls: string[];
+}
+
 const schema = yup.object().shape({
   urls: yup.array().of(
-    yup.string().url("Enter a valid URL.").required("URL is required.")
+    yup
+      .string()
+      .required("URL is required.")
+      .matches(
+        /^https?:\/\/drive\.google\.com\/.+$/,
+        "URL must be in the form of http://drive.google.com/some-link"
+      )
   ),
 });
 
 
 export function CreateRequestMainComponent() {
+  const initialUrls = ["http://drive.google.com/some-link"];
 
   const {
     register,
     handleSubmit,
     control,
+    trigger,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      urls: [""],  // start with one empty URL field
+      urls: initialUrls,
     },
   });
 
@@ -34,8 +47,33 @@ export function CreateRequestMainComponent() {
     name: "urls",
   });
 
-  const onSubmit = (data: unknown) => {
-    console.log(data);
+  const [hideAddUrlBtn, setHideAddUrlBtn] = useState(false);
+
+  useEffect(() => {
+    setHideAddUrlBtn(fields.length >= 10);
+  }, [fields])
+
+
+  const onSubmit = (data: FormData) => {
+    const result = data.urls.map((url: string) => {
+
+      const value = url.substring(url.lastIndexOf('/') + 1);
+      return {
+        url: url,
+        value: value
+      };
+    });
+
+
+    alert(JSON.stringify(result, null, 2));
+  };
+
+  const handleAddUrl = async () => {
+    const isValid = await trigger("urls");
+
+    if (isValid) {
+      append("");
+    }
   };
 
 
@@ -105,23 +143,23 @@ export function CreateRequestMainComponent() {
               </div>
             </div>
 
-
-            <div>
-              <Button
-                type="button"
-                color="light"
-                onClick={() => append("")}
-                className="text-sm font-medium hover:text-purple-800 bg-white hover:bg-gray-50 border border-gray-300"
-              >
-                <span className="flex items-center">
-                  <span className="bg-purple-800 rounded-full p-0.5 mr-2">
-                    <HiPlus className="h-3 w-3 text-white" />
+            {!hideAddUrlBtn && (
+              <div>
+                <Button
+                  type="button"
+                  color="light"
+                  onClick={handleAddUrl}
+                  className="text-sm font-medium hover:text-purple-800 bg-white hover:bg-gray-50 border border-gray-300"
+                >
+                  <span className="flex items-center">
+                    <span className="bg-purple-800 rounded-full p-0.5 mr-2">
+                      <HiPlus className="h-3 w-3 text-white" />
+                    </span>
+                    Add URL
                   </span>
-                  Add URL
-                </span>
-              </Button>
-            </div>
-
+                </Button>
+              </div>
+            )}
 
           </div>
         </div>
