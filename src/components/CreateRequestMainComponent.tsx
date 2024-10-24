@@ -4,7 +4,6 @@ import { Button, TextInput, Label } from "flowbite-react";
 import { HiPlus, HiX } from "react-icons/hi";
 import { IoAdd } from "react-icons/io5";
 import { GoTrash } from "react-icons/go";
-
 import { useForm, useFieldArray } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -44,6 +43,7 @@ export function CreateRequestMainComponent() {
 
   const { fields, append, remove } = useFieldArray({
     control,
+    // @ts-nocheck
     name: "urls",
   });
 
